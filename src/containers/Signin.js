@@ -1,28 +1,117 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardBody,
   CardTitle,
   Button,
-  Form,
-  FormGroup,
-  Input,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupText
+  Form
 } from "reactstrap";
-import { Link } from "react-router-dom";
-import IconEmail from "../components/icons/IconEmail";
-import IconLock from "../components/icons/IconLock";
+
+import Loading from './Loading';
+import Notification from './Notification';
+import SignInForm from './forms/SignInForm';
+
 
 const Signin = props => {
+
+  const baseUrl = "http://localhost:8000";
+  const signinApi = "/api/user/login";
+
+  const [state, setState] = useState({
+    email: "",
+    password: "",
+
+
+    isLoading: false,
+    loginError: false,
+    displayMessage: false,
+    notificationMessage: "",
+  });
+
+  const onChangeField = e => {
+    e.persist();
+    setState(prevState => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
   const OnLogin = e => {
     e.preventDefault();
-    GoDashboard();
+    
+    doLogin();
   };
+
   const GoDashboard = () => {
     props.history.push("/");
   };
+
+  const doLogin = () => {
+    setState(prevState => ({
+      ...prevState,
+      isLoading: true
+    }));
+    const api = baseUrl + signinApi;
+    const payload = {
+      email: state.email,
+      password: state.password
+    };
+    fetch(api, {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        let respData = response.json();
+        return respData;
+    })
+    .then(data => {
+      if (typeof data.user !== 'undefined' && data.user != null) {
+        const userToken = data.token;
+        const userData = data.user;
+        localStorage.setItem('session-id', userToken);
+        localStorage.setItem('session-user-id', userData.id);
+
+        setState(prevState => ({
+          ...prevState,
+          isLoading: false,
+          loginError: false,
+          displayMessage: true,
+          notificationMessage: "Redirecting...",
+        }));
+
+        GoDashboard();
+      }else{
+        setState(prevState => ({
+          ...prevState,
+          isLoading: false,
+          loginError: true,
+          displayMessage: true,
+          notificationMessage: data.message,
+        }));
+      }
+    })
+    .catch(err => {
+      setState(prevState => ({
+        ...prevState,
+        isLoading: false,
+        loginError: true,
+        displayMessage: true,
+        notificationMessage: "Failed to connect game server",
+      }))
+    });
+  }
+
+
+  useEffect(() => {
+    const token = localStorage.getItem('session-id');
+    const uid = localStorage.getItem('session-user-id');
+    
+    if (token !== null || uid !== null){
+      props.history.push("/");
+    }
+  }, [props.history]);
+
   return (
     <div className="container mt-5">
       <div className="col">
@@ -33,50 +122,32 @@ const Signin = props => {
                 <CardTitle>
                   <h3 className="text-center">Login Page</h3>
                 </CardTitle>
+                { state.displayMessage && <Notification correct={ !state.loginError } message={ state.notificationMessage } /> }              
 
-                <FormGroup>
-                  <InputGroup>
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <IconEmail color="black" />
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="email"
-                      name="email"
-                      id="email"
-                      placeholder="Email"
-                      required
-                    />
-                  </InputGroup>
-                </FormGroup>
+                {
+                  state.isLoading && <Loading color="primary" message="loading..."/>
+                }
+                
+                {
+                  !state.isLoading && <SignInForm data={ state } onChangeField={ onChangeField }/>
+                }
 
-                <FormGroup>
-                  <InputGroup>
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <IconLock color="black" />
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="password"
-                      name="password"
-                      id="password"
-                      placeholder="Password"
-                      required
-                    />
-                  </InputGroup>
-                </FormGroup>
-
-                <Button type="submit" outline color="danger" size="lg" block>
+                <br />
+                <br />
+                <Button 
+                  disabled={ state.isLoading }
+                  type="submit" 
+                  color="danger" 
+                  outline 
+                  block>
                   Sign In
                 </Button>
 
                 <Button
+                  disabled={ state.isLoading }
                   onClick={() => props.history.push("/signup")}
                   type="button"
                   color="danger"
-                  size="lg"
                   block
                 >
                   Sign Up

@@ -1,103 +1,132 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardBody,
   CardTitle,
   Button,
-  Form,
-  FormGroup,
-  Input,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupText
+  Form
 } from "reactstrap";
-import IconEmail from "../components/icons/IconEmail";
-import IconLock from "../components/icons/IconLock";
-import IconText from "../components/icons/IconText";
 
-const Register = (props) => {
+import Notification from './Notification';
+import RegisterForm from './forms/RegisterForm';
+import Loading from './Loading';
+
+const Register = props => {
+
+  const baseUrl = "http://localhost:8000";
+  const signUpApi = "/api/user/register";
+
+  const [state, setState] = useState({
+    email: "",
+    username: "",
+    password: "",
+    password_confirmation: "",
+
+    isLoading: false,
+    registerError: false,
+    displayMessage: false,
+    notificationMessage: "",
+    
+  });
+
+  const onChangeField = e => {
+    e.persist();
+    setState(prevState => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+  
+  const OnRegister = e => {
+    e.preventDefault();
+    
+    doRegister();
+  };
+
+  const doRegister = () => {
+    setState(prevState => ({
+      ...prevState,
+      isLoading: true
+    }));
+    const api = baseUrl + signUpApi;
+    const payload = {
+      email: state.email,
+      username: state.username,
+      password: state.password,
+      password_confirmation: state.password_confirmation
+    };
+    fetch(api, {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        let respData = response.json();
+        return respData;
+    })
+    .then(data => {
+      setState(prevState => ({
+        ...prevState,
+        isLoading: false,
+        registerError: false,
+        displayMessage: true,
+        notificationMessage: data.message,
+        email: "",
+        username: "",
+        password: "",
+        password_confirmation: "",
+      }));
+    })
+    .catch(err => {
+      setState(prevState => ({
+        ...prevState,
+        isLoading: false,
+        registerError: true,
+        displayMessage: true,
+        notificationMessage: "Oops, something were wrong !!",
+      }));
+    });
+  }
+
+  useEffect(() => {
+    const token = localStorage.getItem('session-id');
+    const uid = localStorage.getItem('session-user-id');
+    
+    if (token !== null || uid !== null){
+      props.history.push("/");
+    }
+  }, [props.history]);
+
   return (
     <div className="container mt-5">
       <div className="col">
         <div style={{ width: "600px", margin: "auto" }}>
           <Card>
             <CardBody>
-              <Form>
+              <Form onSubmit={ OnRegister }>
                 <CardTitle>
                   <h3 className="text-center">Sign Up</h3>
                 </CardTitle>
+                { state.displayMessage && <Notification correct={ !state.registerError } message={ state.notificationMessage } /> }              
 
-                <FormGroup>
-                  <InputGroup>
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <IconEmail color="black" />
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="email"
-                      name="email"
-                      id="email"
-                      placeholder="Email"
-                      required
-                    />
-                  </InputGroup>
-                </FormGroup>
+                {
+                  state.isLoading && <Loading color="danger" message="loading..."/>
+                }
+                
+                {
+                  !state.isLoading && <RegisterForm data={ state } onChangeField={ onChangeField }/>
+                }
 
-                <FormGroup>
-                  <InputGroup>
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <IconText color="black" />
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="text"
-                      name="name"
-                      id="name"
-                      placeholder="Username"
-                      required
-                    />
-                  </InputGroup>
-                </FormGroup>
-
-                <FormGroup>
-                  <InputGroup>
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <IconLock color="black" />
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="password"
-                      name="password"
-                      id="password"
-                      placeholder="Password"
-                      required
-                    />
-                  </InputGroup>
-                </FormGroup>
-
-                <FormGroup>
-                  <InputGroup>
-                    <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <IconLock color="black" />
-                      </InputGroupText>
-                    </InputGroupAddon>
-                    <Input
-                      type="password"
-                      name="password_confirmation"
-                      id="password_confirmation"
-                      placeholder="Password Confirmation"
-                      required
-                    />
-                  </InputGroup>
-                </FormGroup>
-
-                <Button type="submit" outline color="danger" size="lg" block>
+                <Button 
+                  disabled={ state.isLoading }
+                  type="submit" 
+                  color="danger" 
+                  size="lg"
+                  outline 
+                  block>
                   Sign Up Now!
                 </Button>
+
                 <Button onClick={() => props.history.push("/signin")} type="button" color="danger" size="lg" block>
                   Already have account? Sign In
                 </Button>
