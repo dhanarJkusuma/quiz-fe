@@ -11,9 +11,10 @@ import Notification from './Notification';
 import RegisterForm from './forms/RegisterForm';
 import Loading from './Loading';
 
+import Config from '../Config';
+
 const Register = props => {
 
-  const baseUrl = "http://localhost:8000";
   const signUpApi = "/api/user/register";
 
   const [state, setState] = useState({
@@ -48,7 +49,7 @@ const Register = props => {
       ...prevState,
       isLoading: true
     }));
-    const api = baseUrl + signUpApi;
+    const api = Config.server.BaseUrl + signUpApi;
     const payload = {
       email: state.email,
       username: state.username,

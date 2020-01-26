@@ -11,6 +11,8 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGamepad, faHistory, faLongArrowAltLeft, faPowerOff, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 
+import Config from '../Config';
+
 import Quiz from './Quiz';
 import History from './History';
 import Notification from './Notification';
@@ -18,7 +20,6 @@ import Loading from './Loading';
 
 
 const Dashboard = props => {
-  const baseUrl = "http://localhost:8000";
   const logoutUrl = "/api/user/logout";
   const verifyUrl = "/api/user/verify";
 
@@ -95,7 +96,7 @@ const Dashboard = props => {
       ...prevState,
       isLoading: true,
     }));
-    const api = baseUrl + logoutUrl;
+    const api = Config.server.BaseUrl + logoutUrl;
     const payload = {};
     fetch(api, {
         method: 'POST',
@@ -128,7 +129,7 @@ const Dashboard = props => {
       ...prevState,
       isLoading: true,
     }));
-    const api = baseUrl + verifyUrl;
+    const api = Config.server.BaseUrl + verifyUrl;
     const payload = {};
     fetch(api, {
         method: 'POST',
@@ -181,7 +182,7 @@ const Dashboard = props => {
 
     const fetchData = async () => {
       try {
-          const api = baseUrl + verifyUrl;
+          const api = Config.server.BaseUrl + verifyUrl;
           const token = localStorage.getItem('session-id');
           const response = await fetch(api, {
               method: 'POST',

@@ -4,10 +4,9 @@ import {
 } from 'reactstrap';
 import HistoryItem from './HistoryItem';
 import Notification from './Notification';
+import Config from '../Config';
 
 const History = () => {
-
-    const baseURL = "http://localhost:8000";
     const historyApi = "/api/user/history";
 
     const [state, setState] = useState({
@@ -23,7 +22,7 @@ const History = () => {
     
 
     const fetchHistory = () => {
-        const api = baseURL + historyApi + "?page=" + state.page + "&size=" + state.size;
+        const api = Config.server.BaseUrl + historyApi + "?page=" + state.page + "&size=" + state.size;
         const token = localStorage.getItem('session-id');
         fetch(api, {
             method: 'GET',
@@ -57,7 +56,7 @@ const History = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const api = baseURL + historyApi + "?page=" + 0 + "&size=" + 10;
+                const api = Config.server.BaseUrl + historyApi + "?page=" + 0 + "&size=" + 10;
                 const token = localStorage.getItem('session-id');
                 const response = await fetch(api, {
                     method: 'GET',

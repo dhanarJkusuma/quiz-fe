@@ -19,7 +19,6 @@ import io from "socket.io-client";
 import Notification from './Notification';
 import Loading from './Loading';
 
-
 const Quiz = ({ handleInGame }) => {
     const [state, setState] = useState({
         inlobby: false,
@@ -309,8 +308,6 @@ const Quiz = ({ handleInGame }) => {
     useEffect(() => {
 
         return (() => {
-            console.log('hi');
-            //TODO::handle for user find match, than click back button
         });
     }, []);
 

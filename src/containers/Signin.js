@@ -10,11 +10,10 @@ import {
 import Loading from './Loading';
 import Notification from './Notification';
 import SignInForm from './forms/SignInForm';
-
+import Config from '../Config';
 
 const Signin = props => {
 
-  const baseUrl = "http://localhost:8000";
   const signinApi = "/api/user/login";
 
   const [state, setState] = useState({
@@ -51,7 +50,7 @@ const Signin = props => {
       ...prevState,
       isLoading: true
     }));
-    const api = baseUrl + signinApi;
+    const api = Config.server.BaseUrl + signinApi;
     const payload = {
       email: state.email,
       password: state.password
