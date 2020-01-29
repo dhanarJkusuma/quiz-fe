@@ -18,6 +18,7 @@ import io from "socket.io-client";
 
 import Notification from './Notification';
 import Loading from './Loading';
+import Config from '../Config';
 
 const Quiz = ({ handleInGame }) => {
     const [state, setState] = useState({
@@ -45,8 +46,6 @@ const Quiz = ({ handleInGame }) => {
         alertMsg: "",
         startButton: "Start Game",
       });
-
-    const endpoint = "http://localhost:8000";
 
     const calculatePercentageProgressBar = (count, max) => {
         return parseFloat(count/max) * 100;
@@ -86,7 +85,7 @@ const Quiz = ({ handleInGame }) => {
             ...prevState,
             isLoading: true,
         }));
-        let socket = io(endpoint, { autoConnect: false });
+        let socket = io(Config.server.BaseUrl, { autoConnect: false });
 
         socket.on('do_quiz:initiation', data => {
             let initiateData = JSON.parse(data);
